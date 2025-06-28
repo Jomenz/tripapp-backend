@@ -1,8 +1,12 @@
 package com.tripapp.userservice.booking.controller;
 
 import com.tripapp.userservice.booking.Booking;
+import com.tripapp.userservice.booking.dto.BookingRequest;
 import com.tripapp.userservice.booking.service.Bookingservice;
+import com.tripapp.userservice.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,20 +21,28 @@ public class Bookingcontroller {
         this.bookingService = bookingService;
     }
 
-    // Create a new booking
+    // ✅ Create a new booking using userId from JWT
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
-        Booking savedBooking = bookingService.createBooking(booking);
+    public ResponseEntity<Booking> createBooking(@Valid @RequestBody BookingRequest request,
+                                                 Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        Booking savedBooking = bookingService.createBooking(userId, request);
         return ResponseEntity.ok(savedBooking);
     }
 
-    // Get all bookings
+    // ✅ Get all bookings (admin or dev only - ideally restrict later)
     @GetMapping
     public ResponseEntity<List<Booking>> getAllBookings() {
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
-    // Get booking by ID
+    // ✅ Test endpoint
+    @GetMapping("/test")
+    public String testBookingApi() {
+        return "Booking controller is working";
+    }
+
+    // ✅ Get booking by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookingById(@PathVariable Long id) {
         return bookingService.getBookingById(id)
@@ -38,27 +50,31 @@ public class Bookingcontroller {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Update an existing booking
+    // ✅ Update booking (only if user owns it)
     @PutMapping("/{id}")
-    public ResponseEntity<Booking> updateBooking(@PathVariable Long id, @RequestBody Booking updatedBooking) {
-        return bookingService.getBookingById(id)
-                .map(existingBooking -> {
-                    existingBooking.setServiceType(updatedBooking.getServiceType());
-                    existingBooking.setBookingDetails(updatedBooking.getBookingDetails());
-                    existingBooking.setAmount(updatedBooking.getAmount());
-                    existingBooking.setStatus(updatedBooking.getStatus());
-                    existingBooking.setUserId(updatedBooking.getUserId());
-                    Booking saved = bookingService.createBooking(existingBooking);
-                    return ResponseEntity.ok(saved);
-                })
+    public ResponseEntity<?> updateBooking(@PathVariable Long id,
+                                           @Valid @RequestBody BookingRequest request,
+                                           Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        return bookingService.updateBooking(id, userId, request)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Delete booking by ID
+    // ✅ Delete booking by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
         bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
     }
-}
 
+    // 🔐 Helper method to extract user ID from JWT principal
+    private Long extractUserId(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails customUserDetails) {
+            return customUserDetails.getId();
+        } else {
+            throw new IllegalArgumentException("Invalid authentication principal");
+        }
+    }
+}

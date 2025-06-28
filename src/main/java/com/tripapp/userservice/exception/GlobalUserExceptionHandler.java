@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalUserExceptionHandler {
 
     // Handles validation errors thrown when @Valid fails
     @ExceptionHandler(MethodArgumentNotValidException.class)

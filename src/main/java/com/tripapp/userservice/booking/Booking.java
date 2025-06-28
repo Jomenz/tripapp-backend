@@ -1,7 +1,7 @@
 package com.tripapp.userservice.booking;
 
 import jakarta.persistence.*;
-        import lombok.AllArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,8 +24,8 @@ public class Booking {
 
     private String serviceType; // e.g., "flight", "hotel", "car", "activity"
 
-    @Lob
-    private String bookingDetails; // JSON string of the full booking request
+    @Embedded
+    private BookingDetails bookingDetails; // ✅ Now stored in separate columns
 
     private BigDecimal amount;
 

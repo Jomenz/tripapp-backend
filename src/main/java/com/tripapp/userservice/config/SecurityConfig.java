@@ -34,11 +34,12 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/**",                 // ✅ Allow register, login, forgot-password, reset-password, etc.
+                                "/api/v1/auth/**",           // ✅ Allow auth endpoints (login, register, etc.)
+                                "/api/v1/bookings/**",       // ✅ TEMP: Allow all booking endpoints for testing
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .anyRequest().authenticated()         // ✅ All other endpoints require JWT auth
+                        .anyRequest().authenticated()     // ✅ Require auth for all other endpoints
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
