@@ -21,7 +21,7 @@ public class Bookingcontroller {
         this.bookingService = bookingService;
     }
 
-    // ✅ Create a new booking using userId from JWT
+    //  Create a new booking using userId from JWT
     @PostMapping
     public ResponseEntity<Booking> createBooking(@Valid @RequestBody BookingRequest request,
                                                  Authentication authentication) {
@@ -30,19 +30,19 @@ public class Bookingcontroller {
         return ResponseEntity.ok(savedBooking);
     }
 
-    // ✅ Get all bookings (admin or dev only - ideally restrict later)
+    //  Get all bookings (optional: restrict to admin/dev in future)
     @GetMapping
     public ResponseEntity<List<Booking>> getAllBookings() {
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
-    // ✅ Test endpoint
+    //  Simple test endpoint
     @GetMapping("/test")
     public String testBookingApi() {
         return "Booking controller is working";
     }
 
-    // ✅ Get booking by ID
+    //  Get a booking by its ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookingById(@PathVariable Long id) {
         return bookingService.getBookingById(id)
@@ -50,7 +50,7 @@ public class Bookingcontroller {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Update booking (only if user owns it)
+    //  Update booking (only allowed if the booking belongs to the authenticated user)
     @PutMapping("/{id}")
     public ResponseEntity<?> updateBooking(@PathVariable Long id,
                                            @Valid @RequestBody BookingRequest request,
@@ -61,20 +61,18 @@ public class Bookingcontroller {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Delete booking by ID
+    // Delete a booking (optional: check ownership before deleting)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
         bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
     }
 
-    // 🔐 Helper method to extract user ID from JWT principal
+    // 🔐 Extract userId from JWT-authenticated principal
     private Long extractUserId(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomUserDetails customUserDetails) {
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
             return customUserDetails.getId();
-        } else {
-            throw new IllegalArgumentException("Invalid authentication principal");
         }
+        throw new IllegalArgumentException("Invalid or unauthenticated request - userId extraction failed");
     }
 }

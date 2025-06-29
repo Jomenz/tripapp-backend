@@ -4,7 +4,8 @@ import com.tripapp.userservice.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -14,8 +15,9 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
+    // ✅ Expose user ID for use in services/controllers
     public Long getId() {
-        return user.getId();  // Expose userId to services
+        return user.getId();
     }
 
     public String getEmail() {
@@ -24,7 +26,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();  // Add roles here if needed
+        // You can modify this if your User has roles/permissions
+        return Collections.emptyList();
     }
 
     @Override
@@ -34,26 +37,26 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getEmail(); // Login is done by email
+        return user.getEmail(); // Email is used as the username
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; // Customize if needed
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return true; // Customize if needed
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true; // Customize if needed
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return true; // Customize if needed
     }
 }

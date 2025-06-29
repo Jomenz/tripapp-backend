@@ -33,14 +33,18 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Allow public access to auth and Swagger docs
                         .requestMatchers(
-                                "/api/v1/auth/**",           // ✅ Allow auth endpoints (login, register, etc.)
-                                "/api/v1/bookings/**",       // ✅ TEMP: Allow all booking endpoints for testing
+                                "/api/v1/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .anyRequest().authenticated()     // ✅ Require auth for all other endpoints
+                        // Require auth for booking endpoints
+                        .requestMatchers("/api/v1/bookings/**").authenticated()
+                        // Require auth for anything else
+                        .anyRequest().authenticated()
                 )
+                // Set authentication provider and JWT filter
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
